@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html_empty(self):
@@ -57,6 +57,19 @@ class TestHTMLNode(unittest.TestCase):
             node.props,
             None,
         )
+
+class TestPropsToHTML(unittest.TestCase):
+    def test_multiple_props(self):
+        node = HTMLNode(tag="img", value=None, props={"src": "image.png", "alt": "An image"})
+        self.assertEqual(node.props_to_html(), ' src="image.png" alt="An image"')
+
+    def test_empty_props(self):
+        node = HTMLNode(tag="img", value=None, props={})
+        self.assertEqual(node.props_to_html(), '')
+
+    def test_none_props(self):
+        node = HTMLNode(tag="img", value=None, props=None)
+        self.assertEqual(node.props_to_html(), '')
 
 if __name__ == "__main__":
     unittest.main()
