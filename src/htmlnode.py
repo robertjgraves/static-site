@@ -34,20 +34,52 @@ class LeafNode(HTMLNode):
 
     @children.setter
     def children(self, value):
-        raise AttributeError("LeafNode cannot have children.")
+        if value is not None:
+            raise AttributeError("LeafNode cannot have children.")
     
     def to_html(self):
-        if not self.value:
-            raise ValueError("LeafNode must have a value")
+
+        if self.value is None:
+            # Handle self-closing tags
+            props_string = self.props_to_html() if self.props else ""
+            return f'<{self.tag}{props_string}>'
         
         if not self.tag:
             return self.value
 
         props_string = self.props_to_html() if self.props else ""
-
         html_results = f'<{self.tag}{props_string}>{self.value}</{self.tag}>'.strip()
-
         return html_results
 
     def __repr__(self):
         return f"LeafNode({self.tag}, {self.value}, {self.props})"
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+    
+    def to_html(self):
+        if not self.tag:
+            raise ValueError("ParentNode must have a tag")
+
+        if not self.children:
+            raise ValueError("ParentNode must have children")
+        
+        props_string = self.props_to_html() if self.props else ""
+
+        # opening tag
+        result = f"<{self.tag}{props_string}>"
+
+        # process children
+        for child in self.children:
+            if not isinstance(child, HTMLNode):
+                raise TypeError("Children must be HTMLNode objects")
+            result += child.to_html()
+
+        # closing tag
+        result += f"</{self.tag}>"
+
+        return result
+        
+    def __repr__(self):
+        return f"ParentNode({self.tag}, {self.children}, {self.props})"
