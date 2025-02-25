@@ -1,5 +1,6 @@
 from enum import Enum
 from htmlnode import LeafNode
+#from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link 
 
 class TextType(Enum):
     TEXT = "text"
@@ -44,4 +45,3 @@ def text_node_to_html_node(text_node):
         return LeafNode('img', "", props)
     else:
         raise Exception("Invalid text type")
-        

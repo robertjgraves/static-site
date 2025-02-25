@@ -80,5 +80,6 @@ class TestTextNode(unittest.TestCase):
         with self.assertRaises(Exception):
             html_node = text_node_to_html_node(text_node)
 
+
 if __name__ == "__main__":
     unittest.main()

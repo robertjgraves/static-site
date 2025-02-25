@@ -5,32 +5,41 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     result_nodes = []
     
     for node in old_nodes:
-
-        if node.text_type == TextType.TEXT:
-            first_delimiter = node.text.find(delimiter)
-                        
-            if first_delimiter == -1:
-                result_nodes.append(node)
-
-            else:
-                second_delimiter = node.text.find(delimiter, first_delimiter + 1)
-
-                if second_delimiter == -1:
-                    raise Exception("second delimiter not found")
+        if node.text_type != TextType.TEXT:
+            result_nodes.append(node)
+            continue
             
-                else:
-                    before_text = node.text[:first_delimiter]
-                    middle_text = node.text[first_delimiter + len(delimiter):second_delimiter]
-                    after_text = node.text[second_delimiter + len(delimiter):]
-                    result_nodes.append(TextNode(before_text, TextType.TEXT))
-                    result_nodes.append(TextNode(middle_text, text_type))
-                    result_nodes.append(TextNode(after_text, TextType.TEXT))
- 
-        else:
-            result_nodes.append(node)# add node directly to results
-    
+        first_delimiter = node.text.find(delimiter)
+        if first_delimiter == -1:
+            result_nodes.append(node)
+            continue
+            
+        remaining_text = node.text[first_delimiter + len(delimiter):]
+        
+        # Look for exact matching delimiter
+        second_delimiter_in_remaining = -1
+        current_pos = 0
+        while current_pos <= len(remaining_text) - len(delimiter):
+            if remaining_text[current_pos:current_pos + len(delimiter)] == delimiter:
+                second_delimiter_in_remaining = current_pos
+                break
+            current_pos += 1
+            
+        if second_delimiter_in_remaining == -1:
+            raise Exception("second delimiter not found")
+            
+        second_delimiter = first_delimiter + len(delimiter) + second_delimiter_in_remaining
+        
+        before_text = node.text[:first_delimiter]
+        middle_text = node.text[first_delimiter + len(delimiter):second_delimiter]
+        after_text = node.text[second_delimiter + len(delimiter):]
+        
+        result_nodes.append(TextNode(before_text, TextType.TEXT))
+        result_nodes.append(TextNode(middle_text, text_type))
+        result_nodes.append(TextNode(after_text, TextType.TEXT))
+            
     return result_nodes
-
+    
 def extract_markdown_images(text):
     
     matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
@@ -100,3 +109,35 @@ def split_nodes_link(old_nodes):
         results.append(text_node)    
         
     return results
+
+def text_to_textnodes(text):
+    # First split into bold nodes
+    nodes = [TextNode(text, TextType.TEXT)]
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    
+    # Only process non-bold nodes for other delimiters
+    result = []
+    for node in nodes:
+        if node.text_type == TextType.BOLD:
+            # Don't process bold nodes any further
+            result.append(node)
+        else:
+            # Process other delimiters only for text nodes
+            current = [node]
+            current = split_nodes_delimiter(current, "*", TextType.ITALIC)
+            current = split_nodes_delimiter(current, "`", TextType.CODE)
+            
+            # Handle images and links
+            for n in current:
+                if n.text_type != TextType.TEXT:
+                    result.append(n)
+                    continue
+                    
+                image_nodes = split_nodes_image(n)
+                for img_node in image_nodes:
+                    if img_node.text_type == TextType.TEXT:
+                        result.extend(split_nodes_link(img_node))
+                    else:
+                        result.append(img_node)
+                        
+    return result

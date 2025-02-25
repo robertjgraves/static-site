@@ -1,6 +1,6 @@
 import unittest
 from textnode import TextNode, TextType
-from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_link, split_nodes_image
+from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_link, split_nodes_image, text_to_textnodes
 
 class TestSplitNodesDelimiter(unittest.TestCase):
     def test_plain_text(self):
@@ -306,6 +306,129 @@ class TestSplitNodesImages(unittest.TestCase):
         self.assertEqual(result[1].text, "Link2")
         self.assertEqual(result[1].text_type, TextType.IMAGE)
         self.assertEqual(result[1].url, "http://link2.com")
+
+class TestTextToTextNodes(unittest.TestCase):
+    def test_text_to_textnodes_simple(self):
+        text = "Hello world"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 1)
+        self.assertEqual(nodes[0].text, "Hello world")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+
+    def test_text_to_textnodes_bold(self):
+        text = "Hello **world**"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 3)
+        self.assertEqual(nodes[0].text, "Hello ")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+        self.assertEqual(nodes[1].text, "world")
+        self.assertEqual(nodes[1].text_type, TextType.BOLD)
+
+    def test_text_to_textnodes_image(self):
+        text = "This is ![image](https://i.imgur.com/pic.jpg) inline"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 3)
+        self.assertEqual(nodes[0].text, "This is ")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+        self.assertEqual(nodes[1].text, "image")
+        self.assertEqual(nodes[1].text_type, TextType.IMAGE)
+        self.assertEqual(nodes[1].url, "https://i.imgur.com/pic.jpg")
+        self.assertEqual(nodes[2].text, " inline")
+        self.assertEqual(nodes[2].text_type, TextType.TEXT)
+    
+    def test_text_to_textnodes_italic(self):
+        text = "Hello *world*"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 3)  # Remember we get empty text node at end
+        self.assertEqual(nodes[0].text, "Hello ")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+        self.assertEqual(nodes[1].text, "world")
+        self.assertEqual(nodes[1].text_type, TextType.ITALIC)
+        self.assertEqual(nodes[2].text, "")
+        self.assertEqual(nodes[2].text_type, TextType.TEXT)
+
+    def test_text_to_textnodes_code(self):
+        text = "Hello `code` world"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 3)
+        self.assertEqual(nodes[0].text, "Hello ")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+        self.assertEqual(nodes[1].text, "code")
+        self.assertEqual(nodes[1].text_type, TextType.CODE)
+        self.assertEqual(nodes[2].text, " world")
+        self.assertEqual(nodes[2].text_type, TextType.TEXT)
+
+    def test_text_to_textnodes_link(self):
+        text = "Here is a [link](https://boot.dev)"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 3)
+        self.assertEqual(nodes[0].text, "Here is a ")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+        self.assertEqual(nodes[1].text, "link")
+        self.assertEqual(nodes[1].text_type, TextType.LINK)
+        self.assertEqual(nodes[1].url, "https://boot.dev")
+        self.assertEqual(nodes[2].text, "")
+        self.assertEqual(nodes[2].text_type, TextType.TEXT)
+
+    def test_text_to_textnodes_multiple_types(self):
+        text = "This is **bold** and *italic* with `code`"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 7)
+        
+        # Check first text node
+        self.assertEqual(nodes[0].text, "This is ")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+        
+        # Check bold node
+        self.assertEqual(nodes[1].text, "bold")
+        self.assertEqual(nodes[1].text_type, TextType.BOLD)
+        
+        # Check text between bold and italic
+        self.assertEqual(nodes[2].text, " and ")
+        self.assertEqual(nodes[2].text_type, TextType.TEXT)
+        
+        # Check italic node
+        self.assertEqual(nodes[3].text, "italic")
+        self.assertEqual(nodes[3].text_type, TextType.ITALIC)
+        
+        # Check text between italic and code
+        self.assertEqual(nodes[4].text, " with ")
+        self.assertEqual(nodes[4].text_type, TextType.TEXT)
+        
+        # Check code node
+        self.assertEqual(nodes[5].text, "code")
+        self.assertEqual(nodes[5].text_type, TextType.CODE)
+        
+        # Check final empty text node
+        self.assertEqual(nodes[6].text, "")
+        self.assertEqual(nodes[6].text_type, TextType.TEXT)
+
+    """ def test_text_to_textnodes_nested_not_allowed(self):
+        text = "This **bold *italic*** test"
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 3)
+        
+        # Just treat everything between ** as bold, including the *
+        self.assertEqual(nodes[0].text, "This ")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+        
+        self.assertEqual(nodes[1].text, "bold *italic*")
+        self.assertEqual(nodes[1].text_type, TextType.BOLD)
+        
+        self.assertEqual(nodes[2].text, " test")
+        self.assertEqual(nodes[2].text_type, TextType.TEXT)
+ """
+    def test_text_to_textnodes_empty(self):
+        text = ""
+        nodes = text_to_textnodes(text)
+        self.assertEqual(len(nodes), 1)
+        self.assertEqual(nodes[0].text, "")
+        self.assertEqual(nodes[0].text_type, TextType.TEXT)
+
+"""     def test_text_to_textnodes_complex(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![image](https://example.com) and a [link](https://boot.dev)"
+        nodes = text_to_textnodes(text)
+        # Assert all node types are handled correctly """
 
 if __name__ == "__main__":
     unittest.main()
