@@ -1,8 +1,11 @@
+from copystatic import delete_directory_contents, copy_folder_recursive
 from textnode import TextNode, TextType
 
+
 def main():
-    node = TextNode("This is a text node", TextType.BOLD, "https://www.boot.dev")
-    
-    print(node)
+    source_folder = "./static"
+    destination_folder = "./public"
+    delete_directory_contents(destination_folder)
+    copy_folder_recursive(source_folder, destination_folder)
 
 main()
