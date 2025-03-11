@@ -83,7 +83,7 @@ class TestBlockTypeDetection(unittest.TestCase):
 
 class TestMarkdownToHTML(unittest.TestCase):
     def test_single_paragraph(self):
-        md = "This is **bold** and *italic* in a paragraph."
+        md = "This is **bold** and _italic_ in a paragraph."
         
         node = markdown_to_html_node(md)
         #print(repr(node))
@@ -162,7 +162,7 @@ this is paragraph text
         md = """
 - This is a list
 - with items
-- and *more* items
+- and _more_ items
 """
 
         node = markdown_to_html_node(md)
@@ -176,7 +176,7 @@ this is paragraph text
         md = """
 1. This is a list
 2. with items
-3. and *more* items
+3. and _more_ items
 """
 
         node = markdown_to_html_node(md)

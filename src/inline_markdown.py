@@ -124,7 +124,7 @@ def text_to_textnodes(text):
         else:
             # Process other delimiters only for text nodes
             current = [node]
-            current = split_nodes_delimiter(current, "*", TextType.ITALIC)
+            current = split_nodes_delimiter(current, "_", TextType.ITALIC)
             current = split_nodes_delimiter(current, "`", TextType.CODE)
             
             # Handle images and links

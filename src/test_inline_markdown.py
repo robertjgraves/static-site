@@ -34,8 +34,8 @@ class TestSplitNodesDelimiter(unittest.TestCase):
         self.assertEqual(result[1].text_type, TextType.BOLD)
 
     def test_with_italic(self):
-        node = TextNode("text with *italic* in it", TextType.TEXT)
-        result = split_nodes_delimiter([node], "*", TextType.ITALIC)
+        node = TextNode("text with _italic_ in it", TextType.TEXT)
+        result = split_nodes_delimiter([node], "_", TextType.ITALIC)
         self.assertEqual(len(result), 3)
         self.assertEqual(result[0].text, "text with ")
         self.assertEqual(result[1].text, "italic")
@@ -45,21 +45,21 @@ class TestSplitNodesDelimiter(unittest.TestCase):
     def test_multiple_text_nodes(self):
         # Test with a list containing multiple nodes
         node1 = TextNode("text with `code`", TextType.TEXT)
-        node2 = TextNode("and *italic*", TextType.TEXT)
+        node2 = TextNode("and _italic_", TextType.TEXT)
         nodes = [node1, node2]
         # First split for code
         result1 = split_nodes_delimiter(nodes, "`", TextType.CODE)
         # Then split result for italic
-        result2 = split_nodes_delimiter(result1, "*", TextType.ITALIC)
+        result2 = split_nodes_delimiter(result1, "_", TextType.ITALIC)
         self.assertEqual(len(result2), 6)  # Should have 5 nodes total
 
     def test_non_text_node_preserved(self):
         # Test that already-formatted nodes aren't changed
         node1 = TextNode("text with ", TextType.TEXT)
         node2 = TextNode("code", TextType.CODE)
-        node3 = TextNode(" and *italic*", TextType.TEXT)
+        node3 = TextNode(" and _italic_", TextType.TEXT)
         nodes = [node1, node2, node3]
-        result = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+        result = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
         self.assertEqual(len(result), 5)
         self.assertEqual(result[1].text_type, TextType.CODE)  # Middle node preserved
 
@@ -337,7 +337,7 @@ class TestTextToTextNodes(unittest.TestCase):
         self.assertEqual(nodes[2].text_type, TextType.TEXT)
     
     def test_text_to_textnodes_italic(self):
-        text = "Hello *world*"
+        text = "Hello _world_"
         nodes = text_to_textnodes(text)
         self.assertEqual(len(nodes), 3)  # Remember we get empty text node at end
         self.assertEqual(nodes[0].text, "Hello ")
@@ -371,7 +371,7 @@ class TestTextToTextNodes(unittest.TestCase):
         self.assertEqual(nodes[2].text_type, TextType.TEXT)
 
     def test_text_to_textnodes_multiple_types(self):
-        text = "This is **bold** and *italic* with `code`"
+        text = "This is **bold** and _italic_ with `code`"
         nodes = text_to_textnodes(text)
         self.assertEqual(len(nodes), 7)
         
@@ -404,7 +404,7 @@ class TestTextToTextNodes(unittest.TestCase):
         self.assertEqual(nodes[6].text_type, TextType.TEXT)
 
     """ def test_text_to_textnodes_nested_not_allowed(self):
-        text = "This **bold *italic*** test"
+        text = "This **bold _italic_** test"
         nodes = text_to_textnodes(text)
         self.assertEqual(len(nodes), 3)
         
@@ -412,7 +412,7 @@ class TestTextToTextNodes(unittest.TestCase):
         self.assertEqual(nodes[0].text, "This ")
         self.assertEqual(nodes[0].text_type, TextType.TEXT)
         
-        self.assertEqual(nodes[1].text, "bold *italic*")
+        self.assertEqual(nodes[1].text, "bold _italic_")
         self.assertEqual(nodes[1].text_type, TextType.BOLD)
         
         self.assertEqual(nodes[2].text, " test")
@@ -426,7 +426,7 @@ class TestTextToTextNodes(unittest.TestCase):
         self.assertEqual(nodes[0].text_type, TextType.TEXT)
 
 """     def test_text_to_textnodes_complex(self):
-        text = "This is **text** with an *italic* word and a `code block` and an ![image](https://example.com) and a [link](https://boot.dev)"
+        text = "This is **text** with an _italic_ word and a `code block` and an ![image](https://example.com) and a [link](https://boot.dev)"
         nodes = text_to_textnodes(text)
         # Assert all node types are handled correctly """
 
