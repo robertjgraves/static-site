@@ -18,12 +18,9 @@ def generate_page(from_path, template_path, dest_path):
         markdown_content = markdown_file.read()
 
     title = extract_title(markdown_content)
-    #print(title)
 
     markdown_node = markdown_to_html_node(markdown_content)
     html_content = markdown_node.to_html()
-    
-    #print(html_content)  # View the results of the markdown conversion
 
     with open(template_path, 'r', encoding='utf-8') as template_file:
         template_content = template_file.read()
@@ -31,8 +28,6 @@ def generate_page(from_path, template_path, dest_path):
         rendered_html = template_content.replace("{{ Title }}", title)
         rendered_html = rendered_html.replace("{{ Content }}", html_content)
     
-    
-    # Write full HTML to the destination file
     with open(dest_path, 'w', encoding='utf-8') as output_file:
         output_file.write(rendered_html)
     
