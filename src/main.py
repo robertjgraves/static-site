@@ -2,10 +2,17 @@ from copystatic import delete_directory_contents, copy_folder_recursive
 from textnode import TextNode, TextType
 from page_generator import generate_page, generate_pages_recursive
 import os
+import sys
 
 def main():
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    else:
+        basepath ="/"
+    
     source_folder = "./static"
-    destination_folder = "./public"
+    #destination_folder = "./public"
+    destination_folder = "./docs"
     
     delete_directory_contents(destination_folder)
     copy_folder_recursive(source_folder, destination_folder)
@@ -25,7 +32,7 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     content_dir = os.path.abspath(os.path.join(script_dir, '..', 'content'))
     template_path = os.path.abspath(os.path.join(script_dir, '..', 'template.html'))
-    public_dir = os.path.abspath(os.path.join(script_dir, '..', 'public'))
+    public_dir = os.path.abspath(os.path.join(script_dir, '..', 'docs'))
     
     print(f"Content directory: {content_dir}")
     print(f"Template path: {template_path}")
@@ -37,6 +44,6 @@ def main():
         return
         
     # Generate pages
-    generate_pages_recursive(content_dir, template_path, public_dir)
+    generate_pages_recursive(content_dir, template_path, public_dir, basepath)
 
 main()

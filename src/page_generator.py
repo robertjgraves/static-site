@@ -11,7 +11,7 @@ def extract_title(markdown_string):
     
     raise ValueError("No h1 header (line starting with '#') found in the markdown.")
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     
     with open(from_path, 'r', encoding='utf-8') as markdown_file:
@@ -27,13 +27,15 @@ def generate_page(from_path, template_path, dest_path):
     
         rendered_html = template_content.replace("{{ Title }}", title)
         rendered_html = rendered_html.replace("{{ Content }}", html_content)
+        rendered_html = rendered_html.replace('href="/', f'href="{basepath}')
+        rendered_html = rendered_html.replace('src="/', f'src="{basepath}')
     
     with open(dest_path, 'w', encoding='utf-8') as output_file:
         output_file.write(rendered_html)
     
     print(f"Generated page from {from_path} to {dest_path} using {template_path}")
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     print(f"Processing directory: {dir_path_content}")
     
     # Ensure the destination directory exists
@@ -61,19 +63,20 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
                 html_path = os.path.join(dest_dir_path, html_filename)
                 
                 print(f"Generating: {item_path} -> {html_path}")
-                generate_page(item_path, template_path, html_path)
+                generate_page(item_path, template_path, html_path, basepath)
         
         elif os.path.isdir(item_path):
             # Create equivalent directory in destination
             new_dest_dir = os.path.join(dest_dir_path, item)
             
             # Recursively process the subdirectory
-            generate_pages_recursive(item_path, template_path, new_dest_dir) 
+            generate_pages_recursive(item_path, template_path, new_dest_dir, basepath) 
 
 if __name__ == "__main__":
     #generate_page('content/index.md', 'template.html', 'public/index.html')
     dir_path_content = "content/"
     template_path = ""
     dest_dir_path = "public/"
+    basepath = ""
     
-    generate_pages_recursive(dir_path_content, template_path, dest_dir_path)
+    generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath)
